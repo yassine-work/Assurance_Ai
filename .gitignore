@@ -1,101 +1,41 @@
-# Byte-compiled / optimized / DLL files
+# ── Python ────────────────────────────────────────────────
 __pycache__/
 *.py[cod]
 *$py.class
-
-# C extensions
 *.so
-
-# Distribution / packaging
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-share/python-wheels/
 *.egg-info/
-.installed.cfg
 *.egg
-MANIFEST
+dist/
+build/
 
-# PyInstaller
-#  Usually these files are written by a python script from a template
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
-*.manifest
-*.spec
-
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.nox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.svempty
-.pytest_cache/
-
-# Environments
+# ── Virtual Environments ─────────────────────────────────
 .env
-.venv
+.venv/
 env/
 venv/
-ENV/
-env.bak/
-venv.bak/
 
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# IPython
-profile_default/
-ipython_config.py
-
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
-
-# Pyre type checker
-.pyre/
-
-# IDEs and Editors
-.idea/
-.vscode/
-*.swp
-*.swo
-*~
-
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-model.pkl
-model_backup.pkl
+# ── ML Model (large binary, tracked separately) ─────────
+model/model.pkl
+model/model_backup.pkl
 retrain_log.json
-DataQuest-Brief-Document.pdf
-README_cahier_de_charge.md
 
-# Node
+# ── Node / Frontend ──────────────────────────────────────
 node_modules/
 frontend/node_modules/
 frontend/dist/
+
+# ── Testing ──────────────────────────────────────────────
+.pytest_cache/
+htmlcov/
+.coverage
+
+# ── IDE / OS ─────────────────────────────────────────────
+.vscode/
+.idea/
+.DS_Store
+*.swp
+*.swo
+
+# ── Project-specific (not for sharing) ───────────────────
+DataQuest-Brief-Document.pdf
+README_cahier_de_charge.md

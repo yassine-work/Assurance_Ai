@@ -8,13 +8,14 @@ import pandas as pd
 
 from backend.config import BUNDLE_NAMES, BUNDLE_META
 
-# Path to the project root where solution.py and model.pkl live
+# Path to the project root and model directory
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+MODEL_DIR = os.path.join(PROJECT_ROOT, "model")
 
 
 def _load_solution_module():
     """Dynamically import solution.py without modifying it."""
-    solution_path = os.path.join(PROJECT_ROOT, "solution.py")
+    solution_path = os.path.join(MODEL_DIR, "solution.py")
     spec = importlib.util.spec_from_file_location("solution", solution_path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -24,9 +25,9 @@ def _load_solution_module():
 # Load solution module and model at startup
 _solution = _load_solution_module()
 
-# Ensure model.pkl is loaded from project root
+# Ensure model.pkl is loaded from model/ directory (solution.py uses relative path)
 _original_cwd = os.getcwd()
-os.chdir(PROJECT_ROOT)
+os.chdir(MODEL_DIR)
 _model_artifact = _solution.load_model()
 os.chdir(_original_cwd)
 

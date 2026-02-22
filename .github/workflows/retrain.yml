@@ -72,8 +72,8 @@ jobs:
         with:
           name: retrained-model-${{ github.run_number }}
           path: |
-            model.pkl
-            model_backup.pkl
+            model/model.pkl
+            model/model_backup.pkl
             retrain_log.json
           retention-days: 30
 
@@ -89,7 +89,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add model.pkl retrain_log.json
+          git add model/model.pkl retrain_log.json
           if git diff --cached --quiet; then
             echo "No model changes to commit."
           else

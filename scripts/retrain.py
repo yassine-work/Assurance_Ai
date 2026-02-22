@@ -40,15 +40,16 @@ import joblib
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import f1_score, classification_report
 
-# Add project root to path so we can import train_and_export.py
+# Add project root to path so we can import from model/ directory
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+MODEL_DIR = os.path.join(PROJECT_ROOT, "model")
 sys.path.insert(0, PROJECT_ROOT)
 
 TARGET_COL = "Purchased_Coverage_Bundle"
 ID_COL = "User_ID"
 N_CLASSES = 10
-MODEL_PATH = os.path.join(PROJECT_ROOT, "model.pkl")
-BACKUP_PATH = os.path.join(PROJECT_ROOT, "model_backup.pkl")
+MODEL_PATH = os.path.join(MODEL_DIR, "model.pkl")
+BACKUP_PATH = os.path.join(MODEL_DIR, "model_backup.pkl")
 LOG_PATH = os.path.join(PROJECT_ROOT, "retrain_log.json")
 
 
@@ -104,7 +105,7 @@ def retrain(data_path: str, force: bool = False):
     print("\n🔧 Importing training pipeline from train_and_export.py...")
     import importlib.util
     spec = importlib.util.spec_from_file_location(
-        "trainer", os.path.join(PROJECT_ROOT, "train_and_export.py")
+        "trainer", os.path.join(MODEL_DIR, "train_and_export.py")
     )
     trainer = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(trainer)
