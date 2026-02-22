@@ -14,8 +14,7 @@ build/
 env/
 venv/
 
-# ── ML Model (large binary, tracked separately) ─────────
-model/model.pkl
+# ── ML Model (backup only) ───────────────────────────────
 model/model_backup.pkl
 retrain_log.json
 
