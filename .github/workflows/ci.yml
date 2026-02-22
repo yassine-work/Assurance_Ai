@@ -1,0 +1,81 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# CI/CD Pipeline for AssuranceAI
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# WHAT THIS DOES:
+#   On every push or pull request to main, this workflow automatically:
+#     1. Installs Python dependencies
+#     2. Runs backend tests (pytest) — health, auth, prediction, cache, admin
+#     3. Installs Node.js dependencies
+#     4. Builds the React frontend (catches import/syntax errors)
+#
+# HOW TO SET UP:
+#   1. Push this file to .github/workflows/ci.yml in your GitHub repo
+#   2. Go to repo Settings → Secrets → Actions → Add these secrets:
+#      - DATABASE_URL  (your Neon PostgreSQL connection string)
+#      - JWT_SECRET_KEY (any random string for token signing)
+#   3. Push code → watch the Actions tab → green ✓ = all good!
+#
+# ═══════════════════════════════════════════════════════════════════════════
+
+name: CI — Test & Build
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  # ── Backend Tests ──────────────────────────────────────────────────────
+  backend-test:
+    name: Backend — Lint & Test
+    runs-on: ubuntu-latest
+
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          lfs: true   # model.pkl is large
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r api_requirements.txt
+
+      - name: Run backend tests
+        run: python -m pytest tests/test_api.py -v --tb=short
+
+  # ── Frontend Build ─────────────────────────────────────────────────────
+  frontend-build:
+    name: Frontend — Build Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build

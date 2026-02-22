@@ -1,0 +1,100 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# AssuranceAI — Automated Model Retraining Pipeline
+# ──────────────────────────────────────────────────────────────────────────────
+#
+# HOW IT WORKS:
+#   1. Triggered manually (workflow_dispatch) or on a weekly schedule
+#   2. Checks out the repo, sets up Python, installs dependencies
+#   3. Runs the retraining script with the training data
+#   4. If the new model is better, commits and pushes the updated model.pkl
+#   5. Uploads the model + training log as artifacts for audit
+#
+# HOW TO TRIGGER MANUALLY:
+#   Go to GitHub → Actions → "Retrain Model" → "Run workflow"
+#   You can provide a custom data path or leave the default (train.csv)
+#
+# ──────────────────────────────────────────────────────────────────────────────
+
+name: Retrain Model
+
+on:
+  # Manual trigger from GitHub UI
+  workflow_dispatch:
+    inputs:
+      data_path:
+        description: 'Path to training CSV (relative to repo root)'
+        required: false
+        default: 'train.csv'
+      force:
+        description: 'Force replace model even if new one is worse'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+
+  # Automatic weekly retrain (every Sunday at 2am UTC)
+  schedule:
+    - cron: '0 2 * * 0'
+
+jobs:
+  retrain:
+    name: Retrain CatBoost Model
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run retraining pipeline
+        run: |
+          DATA_PATH="${{ github.event.inputs.data_path || 'train.csv' }}"
+          FORCE_FLAG=""
+          if [ "${{ github.event.inputs.force }}" = "true" ]; then
+            FORCE_FLAG="--force"
+          fi
+          python scripts/retrain.py --data "$DATA_PATH" $FORCE_FLAG
+
+      - name: Upload model artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: retrained-model-${{ github.run_number }}
+          path: |
+            model.pkl
+            model_backup.pkl
+            retrain_log.json
+          retention-days: 30
+
+      - name: Upload training log
+        uses: actions/upload-artifact@v4
+        with:
+          name: retrain-log-${{ github.run_number }}
+          path: retrain_log.json
+          retention-days: 90
+
+      # Optional: auto-commit the new model back to the repo
+      - name: Commit updated model (if changed)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add model.pkl retrain_log.json
+          if git diff --cached --quiet; then
+            echo "No model changes to commit."
+          else
+            git commit -m "chore: retrained model (run #${{ github.run_number }})"
+            git push
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
